@@ -1,0 +1,9 @@
+build/
+build_web/
+.vscode/
+*.exe
+*.o
+*.a
+*.html
+*.js
+*.wasm
