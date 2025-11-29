@@ -8,13 +8,18 @@ Para el proyecto final se desarrolló un solver de hidrodinámica interactivo co
 **Estructura del proyecto:**
 
 hydro-sim/
+
 ├── src/
+
 │   ├── main.c           
 │   ├── solver.c         
 │   └── renderer.c       
-├── include/             
+├── include/     
+
 ├── platforms/
+
 │   └── web/
+
 │       └── shell.html   
 ├── CMakeLists.txt       
 └── .gitignore
