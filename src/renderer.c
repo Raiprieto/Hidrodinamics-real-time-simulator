@@ -24,8 +24,8 @@ void Renderer_HandleInput(SimulationState *state) {
         int gy = (int)(mouse.y / scaleY);
         
         // Pincel de radio 2
-        for(int dy=-2; dy<=2; dy++) {
-            for(int dx=-2; dx<=2; dx++) {
+        for(int dy=-1; dy<=1; dy++) {
+            for(int dx=-1; dx<=1; dx++) {
                 int nx = gx + dx;
                 int ny = gy + dy;
                 if(nx >=0 && nx < GRID_W && ny >=0 && ny < GRID_H) {

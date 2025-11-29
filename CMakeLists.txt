@@ -19,6 +19,7 @@ set(SOURCES
     src/main.c 
     src/solver.c 
     src/renderer.c
+    src/analysis.c  
 )
 
 # --- 3. Crear ejecutable ---
