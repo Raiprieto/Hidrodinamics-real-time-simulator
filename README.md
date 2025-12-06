@@ -63,3 +63,22 @@ En main se une la lógica de Raylib con el solver, donde básicamente a través 
 # Build local
 
 Para generar el build local se usa el archivo CMakeLists.txt, que tiene las instrucciones en CMake para la generación del ejecutable completo. 
+
+
+Compilación:
+
+1. Entrar a la carpeta build 
+
+cd build
+
+2. Volver a poner el compilador en el camino
+
+(Ajusta la ruta si no usas la de Raylib por defecto)
+
+$env:PATH += ";C:\raylib\w64devkit\bin"
+
+3. Configurar de nuevo
+cmake -G "MinGW Makefiles" ..
+
+4. Compilar
+cmake --build .
