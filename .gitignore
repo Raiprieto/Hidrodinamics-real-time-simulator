@@ -7,3 +7,4 @@ build_web/
 *.html
 *.js
 *.wasm
+!docs/
