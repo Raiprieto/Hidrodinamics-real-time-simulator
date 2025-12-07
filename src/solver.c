@@ -59,7 +59,6 @@ void Solver_Step(SimulationState *state) {
                     if (state->barrier[neighbor_idx]) {
                         // Si el vecino es pared, rebota la partícula que iba hacia allá
                         // Leemos de NOSOTROS mismos en la dirección opuesta (opp[k])
-                        // Esto es un truco común en implementaciones simples
                         f_val = state->f[i*Q + opp[k]]; 
                     } else {
                         f_val = state->f[neighbor_idx*Q + k];

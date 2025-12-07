@@ -15,15 +15,59 @@ RenderContext ctx;
 bool simulation_running = false; // Control de estado de la simulación
 int time_step_counter = 0; // Contador global de pasos
 
+void ResetBarriers(SimulationState *state) {
+    for(int i=0; i<GRID_W*GRID_H; i++) {
+        state->barrier[i] = false;
+    }
+}
+
+void InitScenario(SimulationState *state, int type) {
+    ResetBarriers(state);
+    int cx = GRID_W / 3; // Un poco a la izquierda
+    int cy = GRID_H / 2;
+
+    if (type == 1) { // Círculo
+        int r = GRID_H / 8;
+        for(int y=0; y<GRID_H; y++) {
+            for(int x=0; x<GRID_W; x++) {
+                if ((x-cx)*(x-cx) + (y-cy)*(y-cy) <= r*r) {
+                    state->barrier[idx(x,y)] = true;
+                }
+            }
+        }
+    } else if (type == 2) { // Cuadrado
+        int r = GRID_H / 8;
+        for(int y=cy-r; y<=cy+r; y++) {
+            for(int x=cx-r; x<=cx+r; x++) {
+                if(x>=0 && x<GRID_W && y>=0 && y<GRID_H)
+                    state->barrier[idx(x,y)] = true;
+            }
+        }
+    } else if (type == 3) { // Pared Vertical
+        int w = 10;
+        int h = GRID_H / 2;
+        for(int y=cy-h/2; y<=cy+h/2; y++) {
+            for(int x=cx; x<cx+w; x++) {
+                 if(x>=0 && x<GRID_W && y>=0 && y<GRID_H)
+                    state->barrier[idx(x,y)] = true;
+            }
+        }
+    }
+}
+
 void UpdateDrawFrame(void) {
     // 1. Input (Interacción del usuario)
     Renderer_HandleInput(&state);
     
     // Control de inicio de simulación
     if (!simulation_running) {
-        if (IsKeyPressed(KEY_ENTER)) {
-            simulation_running = true;
-        }
+        if (IsKeyPressed(KEY_ENTER)) simulation_running = true;
+        
+        // Escenarios
+        if (IsKeyPressed(KEY_ONE)) InitScenario(&state, 1); // Círculo
+        if (IsKeyPressed(KEY_TWO)) InitScenario(&state, 2); // Cuadrado
+        if (IsKeyPressed(KEY_THREE)) InitScenario(&state, 3); // Pared
+        if (IsKeyPressed(KEY_C)) ResetBarriers(&state);     // Limpiar
     }
 
     // 2. Física y Análisis
@@ -62,6 +106,8 @@ void UpdateDrawFrame(void) {
         
         if (!simulation_running) {
             DrawText("PAUSED - PRESS ENTER TO START", 10, 70, 20, YELLOW);
+            DrawText("Presets: [1] Circle  [2] Square  [3] Wall  [C] Clear", 10, 95, 10, GRAY);
+            DrawText("Draw with Mouse Left Click", 10, 110, 10, GRAY);
         } else {
             if (time_step_counter % 1000 < 60) {
                 DrawText("GUARDANDO SNAPSHOT...", 10, 65, 10, RED);

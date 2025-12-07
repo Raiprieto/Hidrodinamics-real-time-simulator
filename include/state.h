@@ -5,7 +5,7 @@
 
 // Resolución de la simulación (bajamos un poco para que vaya rápido en CPU)
 #define GRID_W 200
-#define GRID_H 100
+#define GRID_H 200
 
 // Modelo D2Q9 (9 velocidades)
 #define Q 9
