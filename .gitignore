@@ -1,10 +1,11 @@
 build/
 build_web/
 .vscode/
+!docs/
 *.exe
 *.o
 *.a
 *.html
 *.js
 *.wasm
-!docs/
+
