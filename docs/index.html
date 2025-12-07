@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <title>HydroSim</title>
+    <style>body { margin: 0; background: black; display: flex; justify-content: center; }</style>
+  </head>
+  <body>
+    <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+    <script type='text/javascript'>
+      var Module = {
+        canvas: (function() { return document.getElementById('canvas'); })()
+      };
+    </script>
+    <script async type="text/javascript" src="HydroSim.js"></script>
+  </body>
+</html>

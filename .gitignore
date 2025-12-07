@@ -5,7 +5,5 @@ build_web/
 *.exe
 *.o
 *.a
-*.html
-*.js
-*.wasm
+
 
