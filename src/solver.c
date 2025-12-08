@@ -17,6 +17,9 @@ void Solver_Init(SimulationState *state) {
     state->uy = (float*)calloc(N, sizeof(float));
     state->barrier = (bool*)calloc(N, sizeof(bool));
 
+    // Inicializar omega
+    state->omega = 1.8f;
+
     // Inicializar fluido quieto con densidad 1.0
     for (int i = 0; i < N; i++) {
         state->rho[i] = 1.0f;
@@ -98,8 +101,8 @@ void Solver_Step(SimulationState *state) {
                 float cu = 3.0f * (cx[k]*ux + cy[k]*uy);
                 float f_eq = w[k] * rho * (1.0f + cu + 0.5f*(cu*cu) - 1.5f*(ux*ux + uy*uy));
                 
-                // Relajación (omega = 1.9 para baja viscosidad)
-                float omega = 1.8f; 
+                // Relajación (omega variable)
+                float omega = state->omega; 
                 state->new_f[i*Q + k] = (1.0f - omega) * state->new_f[i*Q + k] + omega * f_eq;
             }
         }

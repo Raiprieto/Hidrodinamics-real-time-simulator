@@ -13,4 +13,10 @@ float Analysis_ComputeAndSave(SimulationState *state, int time_step);
 // Guarda el estado completo de la grilla (para abrir con Python/Matlab/Paraview)
 void Analysis_SaveSnapshot(SimulationState *state, int time_step);
 
+// Inicializa el log de performance
+void Analysis_InitPerformanceLog(void);
+
+// Guarda el tiempo de procesamiento de los ultimos N pasos
+void Analysis_LogPerformance(int step, double duration);
+
 #endif

@@ -4,6 +4,7 @@
 
 // Nombre del archivo de log
 static const char* LOG_FILE = "simulation_log.csv";
+static const char* PERF_FILE = "tiempos.csv";
 
 void Analysis_Init(void) {
     FILE *f = fopen(LOG_FILE, "w");
@@ -71,4 +72,19 @@ void Analysis_SaveSnapshot(SimulationState *state, int time_step) {
     }
     fclose(f);
     printf("Snapshot guardado: %s\n", filename);
+}
+
+void Analysis_InitPerformanceLog(void) {
+    FILE *f = fopen(PERF_FILE, "w");
+    if (f == NULL) return;
+    fprintf(f, "Step,ProcessingTime\n");
+    fclose(f);
+}
+
+void Analysis_LogPerformance(int step, double duration) {
+    FILE *f = fopen(PERF_FILE, "a");
+    if (f != NULL) {
+        fprintf(f, "%d,%.6f\n", step, duration);
+        fclose(f);
+    }
 }
