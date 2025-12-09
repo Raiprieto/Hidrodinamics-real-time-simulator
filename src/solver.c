@@ -19,6 +19,7 @@ void Solver_Init(SimulationState *state) {
 
     // Inicializar omega
     state->omega = 1.8f;
+    state->inlet_velocity = 0.06f; 
 
     // Inicializar fluido quieto con densidad 1.0
     for (int i = 0; i < N; i++) {
@@ -87,7 +88,7 @@ void Solver_Step(SimulationState *state) {
 
             // --- INLET (Viento desde la izquierda) ---
             if (x == 0) {
-                ux = 0.1f; // Velocidad de entrada
+                ux = state->inlet_velocity; // Velocidad de entrada
                 uy = 0.0f;
                 rho = 1.0f;
             }

@@ -4,8 +4,8 @@
 #include <stdbool.h>
 
 // Resolución de la simulación (bajamos un poco para que vaya rápido en CPU)
-#define GRID_W 500
-#define GRID_H 500
+#define GRID_W 300
+#define GRID_H 300
 
 // Modelo D2Q9 (9 velocidades)
 #define Q 9
@@ -22,6 +22,7 @@ typedef struct {
     bool *barrier;  // Obstáculos (paredes)
     
     float omega;    // Parametro de relajacion
+    float inlet_velocity; // Velocidad de entrada
 } SimulationState;
 
 // Helper para obtener índice 1D

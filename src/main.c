@@ -4,6 +4,8 @@
 #include "renderer.h"
 #include "analysis.h" 
 #include <stdbool.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 #if defined(PLATFORM_WEB)
     #include <emscripten/emscripten.h>
@@ -15,6 +17,17 @@ RenderContext ctx;
 bool simulation_running = false; // Control de estado de la simulación
 int time_step_counter = 0; // Contador global de pasos
 double solver_accumulated_time = 0.0; // Acumulador de tiempo de procesamiento
+
+// Input buffer para Omega
+char omega_str[32] = "1.80"; 
+int omega_char_count = 4;
+
+// Input buffer para Velocity
+char velocity_str[32] = "0.06";
+int velocity_char_count = 4;
+
+// Modos de edición: 0=Ninguno, 1=Omega, 2=Velocity
+int edit_mode = 0;
 
 void ResetBarriers(SimulationState *state) {
     for(int i=0; i<GRID_W*GRID_H; i++) {
@@ -62,22 +75,71 @@ void UpdateDrawFrame(void) {
     
     // Control de inicio de simulación
     if (!simulation_running) {
-        if (IsKeyPressed(KEY_ENTER)) simulation_running = true;
-        
-        // Escenarios
-        if (IsKeyPressed(KEY_ONE)) InitScenario(&state, 1); // Círculo
-        if (IsKeyPressed(KEY_TWO)) InitScenario(&state, 2); // Cuadrado
-        if (IsKeyPressed(KEY_THREE)) InitScenario(&state, 3); // Pared
-        if (IsKeyPressed(KEY_C)) ResetBarriers(&state);     // Limpiar
-
-        // Control de Omega
-        if (IsKeyPressed(KEY_UP)) {
-            state.omega += 0.01f;
-            if (state.omega > 1.95f) state.omega = 1.95f;
+        // Toggle Edición
+        if (IsKeyPressed(KEY_O)) {
+            if (edit_mode == 1) edit_mode = 0; // Salir de Omega
+            else edit_mode = 1; // Entrar a Omega
         }
-        if (IsKeyPressed(KEY_DOWN)) {
-            state.omega -= 0.01f;
-            if (state.omega < 0.5f) state.omega = 0.5f;
+        if (IsKeyPressed(KEY_V)) {
+            if (edit_mode == 2) edit_mode = 0; // Salir de Velocidad
+            else edit_mode = 2; // Entrar a Velocidad
+        }
+
+        if (edit_mode == 1) {
+            // -- EDITAR OMEGA --
+            int key = GetCharPressed();
+            while (key > 0) {
+                if (((key >= 48 && key <= 57) || key == 46) && (omega_char_count < 10)) {
+                    omega_str[omega_char_count] = (char)key;
+                    omega_str[omega_char_count+1] = '\0';
+                    omega_char_count++;
+                }
+                key = GetCharPressed();
+            }
+            if (IsKeyPressed(KEY_BACKSPACE)) {
+                if (omega_char_count > 0) {
+                    omega_char_count--;
+                    omega_str[omega_char_count] = '\0';
+                }
+            }
+            // Actualizar Omega
+            float val = (float)atof(omega_str);
+            if (val < 0.1f) val = 0.1f;
+            if (val > 1.99f) val = 1.99f;
+            state.omega = val;
+
+        } else if (edit_mode == 2) {
+             // -- EDITAR VELOCIDAD --
+            int key = GetCharPressed();
+            while (key > 0) {
+                if (((key >= 48 && key <= 57) || key == 46) && (velocity_char_count < 10)) {
+                    velocity_str[velocity_char_count] = (char)key;
+                    velocity_str[velocity_char_count+1] = '\0';
+                    velocity_char_count++;
+                }
+                key = GetCharPressed();
+            }
+            if (IsKeyPressed(KEY_BACKSPACE)) {
+                if (velocity_char_count > 0) {
+                    velocity_char_count--;
+                    velocity_str[velocity_char_count] = '\0';
+                }
+            }
+            // Actualizar Velocidad
+            float val = (float)atof(velocity_str);
+            if (val < 0.0f) val = 0.0f;
+            if (val > 0.5f) val = 0.5f; // Limite razonable
+            state.inlet_velocity = val;
+            
+        } else {
+            // -- MODO NORMAL --
+            if (IsKeyPressed(KEY_ENTER)) simulation_running = true;
+            
+            // Escenarios
+            if (IsKeyPressed(KEY_ONE)) InitScenario(&state, 1); 
+            if (IsKeyPressed(KEY_TWO)) InitScenario(&state, 2); 
+            if (IsKeyPressed(KEY_THREE)) InitScenario(&state, 3); 
+            if (IsKeyPressed(KEY_C)) ResetBarriers(&state);     
         }
     }
 
@@ -126,9 +188,21 @@ void UpdateDrawFrame(void) {
         
         if (!simulation_running) {
             DrawText("PAUSED - PRESS ENTER TO START", 10, 70, 20, YELLOW);
-            DrawText(TextFormat("Omega: %.2f (UP/DOWN to change)", state.omega), 10, 95, 20, WHITE);
-            DrawText("Presets: [1] Círculo  [2] Cuadrado  [3] Pared  [C] Limpiar", 10, 120, 10, GRAY);
-            DrawText("Draw with Mouse Left Click", 10, 135, 10, GRAY);
+            
+            Color omegaColor = (edit_mode == 1) ? RED : WHITE;
+            DrawText(TextFormat("Omega: %s", omega_str), 10, 95, 20, omegaColor);
+            
+            Color velColor = (edit_mode == 2) ? RED : WHITE;
+            DrawText(TextFormat("Velocity: %s", velocity_str), 10, 120, 20, velColor);
+
+            if (edit_mode != 0) {
+                DrawText("[EDITING] Type Value - Press key again to Save", 200, 95, 10, RED);
+            } else {
+                DrawText("Press 'O' for Omega, 'V' for Velocity", 200, 95, 10, GRAY);
+            }
+
+            DrawText("Presets: [1] Círculo  [2] Cuadrado  [3] Pared  [C] Limpiar", 10, 150, 10, GRAY);
+            DrawText("Draw with Mouse Left Click", 10, 165, 10, GRAY);
         } else {
             if (time_step_counter % 1000 < 60) {
                 DrawText("GUARDANDO SNAPSHOT...", 10, 65, 10, RED);
