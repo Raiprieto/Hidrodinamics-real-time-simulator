@@ -26,8 +26,13 @@ int omega_char_count = 4;
 char velocity_str[32] = "0.06";
 int velocity_char_count = 4;
 
-// Modos de edición: 0=Ninguno, 1=Omega, 2=Velocity
+// Modos de edición: 0=Ninguno, 1=Omega, 2=Velocity, 3=Snapshot
 int edit_mode = 0;
+
+// Input buffer para Snapshot Period
+char snapshot_str[32] = "1000";
+int snapshot_char_count = 4;
+int snapshot_period = 1000;
 
 void ResetBarriers(SimulationState *state) {
     for(int i=0; i<GRID_W*GRID_H; i++) {
@@ -84,6 +89,10 @@ void UpdateDrawFrame(void) {
             if (edit_mode == 2) edit_mode = 0; // Salir de Velocidad
             else edit_mode = 2; // Entrar a Velocidad
         }
+        if (IsKeyPressed(KEY_S)) {
+            if (edit_mode == 3) edit_mode = 0; // Salir de Snapshot
+            else edit_mode = 3; // Entrar a Snapshot
+        }
 
         if (edit_mode == 1) {
             // -- EDITAR OMEGA --
@@ -131,6 +140,29 @@ void UpdateDrawFrame(void) {
             if (val > 0.5f) val = 0.5f; // Limite razonable
             state.inlet_velocity = val;
             
+        } else if (edit_mode == 3) {
+             // -- EDITAR SNAPSHOT --
+            int key = GetCharPressed();
+            while (key > 0) {
+                // Solo números para snapshot (sin punto decimal)
+                if ((key >= 48 && key <= 57) && (snapshot_char_count < 10)) {
+                    snapshot_str[snapshot_char_count] = (char)key;
+                    snapshot_str[snapshot_char_count+1] = '\0';
+                    snapshot_char_count++;
+                }
+                key = GetCharPressed();
+            }
+            if (IsKeyPressed(KEY_BACKSPACE)) {
+                if (snapshot_char_count > 0) {
+                    snapshot_char_count--;
+                    snapshot_str[snapshot_char_count] = '\0';
+                }
+            }
+            // Actualizar Snapshot Period
+            int val = atoi(snapshot_str);
+            if (val < 1) val = 1;
+            snapshot_period = val;
+            
         } else {
             // -- MODO NORMAL --
             if (IsKeyPressed(KEY_ENTER)) simulation_running = true;
@@ -170,9 +202,8 @@ void UpdateDrawFrame(void) {
                 Analysis_ComputeAndSave(&state, time_step_counter);
             }
 
-            // B. Snapshots Completos (Archivos grandes) cada 1000 pasos
-            // (Esto es pesado, hazlo menos frecuente)
-            if (time_step_counter % 1000 == 0) {
+            // B. Snapshots Completos (Archivos grandes) cada 'snapshot_period' pasos
+            if (time_step_counter % snapshot_period == 0) {
                 Analysis_SaveSnapshot(&state, time_step_counter);
             }
         }
@@ -195,16 +226,19 @@ void UpdateDrawFrame(void) {
             Color velColor = (edit_mode == 2) ? RED : WHITE;
             DrawText(TextFormat("Velocity: %s", velocity_str), 10, 120, 20, velColor);
 
+            Color snapColor = (edit_mode == 3) ? RED : WHITE;
+            DrawText(TextFormat("Snapshot Every: %s", snapshot_str), 10, 145, 20, snapColor);
+
             if (edit_mode != 0) {
                 DrawText("[EDITING] Type Value - Press key again to Save", 200, 95, 10, RED);
             } else {
-                DrawText("Press 'O' for Omega, 'V' for Velocity", 200, 95, 10, GRAY);
+                DrawText("Press 'O' for Omega, 'V' for Velocity, 'S' for Snapshot", 200, 95, 10, GRAY);
             }
 
-            DrawText("Presets: [1] Círculo  [2] Cuadrado  [3] Pared  [C] Limpiar", 10, 150, 10, GRAY);
-            DrawText("Draw with Mouse Left Click", 10, 165, 10, GRAY);
+            DrawText("Presets: [1] Círculo  [2] Cuadrado  [3] Pared  [C] Limpiar", 10, 175, 10, GRAY);
+            DrawText("Draw with Mouse Left Click", 10, 190, 10, GRAY);
         } else {
-            if (time_step_counter % 1000 < 60) {
+            if (time_step_counter % snapshot_period < 60) {
                 DrawText("GUARDANDO SNAPSHOT...", 10, 65, 10, RED);
             }
         }
